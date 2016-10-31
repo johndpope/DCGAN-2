@@ -44,8 +44,9 @@ class DataSet(object):
         imgs, labels = [], []
         for i in range(start, end):
             img = cv2.imread(self.files[i])
+            img = cv2.resize(img, (255, 255))
             imgs.append(img)
-            imgs1.append(1.0)
+            labels.append(1.0)
 
         return [np.array(imgs), np.array(labels)]
 
@@ -61,4 +62,4 @@ if __name__ == '__main__':
     data = read_data_sets()
     for i in range(100):
         fs = data.train.next_batch(50)
-        print fs[0].shape, fs[1].shape
+        print fs[0][0].shape, fs[1][0].shape
