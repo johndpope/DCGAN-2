@@ -253,8 +253,8 @@ if __name__ == '__main__':
     config = dnn_cell_template(data = None, length = None)
     dnn = dcgan(config = config)
     dnn.construct()
-    learning_config = {'BatchConfig' : {'TrainNum' : 2,
-                                        'BatchSize' : 50,
+    learning_config = {'BatchConfig' : {'TrainNum' : 1000,
+                                        'BatchSize' : 1,
                                         'LogPeriod' : 1}}
     dnn.learning(data = data, config = learning_config)
     z = [2.0 * np.random.rand(100) - 1.0]
