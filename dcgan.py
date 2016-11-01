@@ -59,6 +59,7 @@ class dcgan(dnn_template):
             if i%config['BatchConfig']['LogPeriod'] == 0:
                 feed_dict = self.make_feed_dict(prob = True, batch = batch)
                 ac0 = self.accuracy[0].eval(feed_dict=feed_dict)
+                feed_dict = self.make_feed_dict(prob = True, batch = batch, image = False)
                 ac1 = self.accuracy[1].eval(feed_dict=feed_dict)
                 print "step %d, D-Loss / G-Loss %g , %g"%(i, ac0, ac1), datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                 self.save_checkpoint()
