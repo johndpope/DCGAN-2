@@ -235,7 +235,7 @@ class dcgan(dnn_template):
                                Padding = 'SAME',
                                Network_type = 'transpose')
             g4, _ = sly.deconv(x = g3, vname = 'Deconv4',
-                               Act = 'Relu',
+                               Act = 'Tanh',
                                Batch = True,
                                InputNode = [32, 32, 128],
                                OutputNode = [self.h, self.w, self.c],
