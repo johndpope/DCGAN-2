@@ -6,7 +6,8 @@ import numpy as np
 import cv2
 
 class DataSet(object):
-    def __init__(self):
+    def __init__(self, zdim = 100):
+        self.zdim = zdim
         cmd = "find ./Data/Sample -name \'*.jpg\'"
         res = commands.getoutput(cmd)
         self.files = res.split("\n")
@@ -44,9 +45,10 @@ class DataSet(object):
         imgs, labels = [], []
         for i in range(start, end):
             img = cv2.imread(self.files[i])
-            img = cv2.resize(img, (255, 255))
+            img = cv2.resize(img, (64, 64))
             imgs.append(img)
-            labels.append(1.0)
+            r = 2.0 * np.random.rand(self.zdim) - 1.0
+            labels.append(r)
 
         return [np.array(imgs), np.array(labels)]
 

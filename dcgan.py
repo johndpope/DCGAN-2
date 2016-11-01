@@ -40,13 +40,36 @@ class dcgan(dnn_template):
         self.loss()
         # 学習
         self.training()
-        '''
+
         # 精度の定義
         self.get_accuracy()
         # チェックポイントの呼び出し
         self.saver = tf.train.Saver()
         self.restore()
-        '''
+
+    # 学習の実行
+    def learning(self, data,
+                 config = {'BatchConfig' : {'TrainNum' : 100,
+                                            'BatchSize' : 50,
+                                            'LogPeriod' : 5}}):
+        for i in range(config['BatchConfig']['TrainNum']):
+            batch = data.train.next_batch(config['BatchConfig']['BatchSize'])
+            # 途中経過のチェック
+            if i%config['BatchConfig']['LogPeriod'] == 0:
+                feed_dict = self.make_feed_dict(prob = True, batch = batch)
+                train_accuracy = self.accuracy.eval(feed_dict=feed_dict)
+                print "step %d, training accuracy %g"%(i, train_accuracy), datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+                self.save_checkpoint()
+                # 学習
+                feed_dict = self.make_feed_dict(prob = False, batch = batch)
+                self.train_op.run(feed_dict=feed_dict)
+        self.save_checkpoint()
+
+
+    # 精度評価
+    def get_accuracy(self):
+        self.accuracy = [self.d_loss, self.g_loss]
+
 
     def training(self):
         d_val = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='D')
@@ -59,7 +82,7 @@ class dcgan(dnn_template):
                                     algo = self.config["TrainingConfig"]["TrainOps"],
                                     learning_rate = self.config["TrainingConfig"]["LearningRate"],
                                     var_list = g_val)
-        
+
 
     # 誤差関数の定義
     def loss(self):
