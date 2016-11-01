@@ -64,10 +64,10 @@ class dcgan(dnn_template):
                 print "step %d, D-Loss / G-Loss %g , %g"%(i, ac0, ac1), datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                 self.save_checkpoint()
             # 学習
-            feed_dict = self.make_feed_dict(prob = False, batch = batch, image = False)
-            self.g_opt.run(feed_dict=feed_dict)
             feed_dict = self.make_feed_dict(prob = False, batch = batch)
             self.d_opt.run(feed_dict=feed_dict)
+            feed_dict = self.make_feed_dict(prob = False, batch = batch, image = False)
+            self.g_opt.run(feed_dict=feed_dict)
 
         self.save_checkpoint()
 
