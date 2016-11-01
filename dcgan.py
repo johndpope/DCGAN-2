@@ -12,6 +12,7 @@ from dnnlib import layer as ly
 from dnnlib import simple_layer as sly
 from dnnlib.config_template import *
 from dnnlib.dnn_template import dnn_template
+from datetime import datetime
 
 class dcgan(dnn_template):
     def __init__(self,
@@ -57,13 +58,34 @@ class dcgan(dnn_template):
             # 途中経過のチェック
             if i%config['BatchConfig']['LogPeriod'] == 0:
                 feed_dict = self.make_feed_dict(prob = True, batch = batch)
-                train_accuracy = self.accuracy.eval(feed_dict=feed_dict)
-                print "step %d, training accuracy %g"%(i, train_accuracy), datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+                ac0 = self.accuracy[0].eval(feed_dict=feed_dict)
+                ac1 = self.accuracy[1].eval(feed_dict=feed_dict)
+                print "step %d, D-Loss / G-Loss %g , %g"%(i, ac0, ac1), datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                 self.save_checkpoint()
-                # 学習
-                feed_dict = self.make_feed_dict(prob = False, batch = batch)
-                self.train_op.run(feed_dict=feed_dict)
+            # 学習
+            feed_dict = self.make_feed_dict(prob = False, batch = batch)
+            self.d_opt.run(feed_dict=feed_dict)
+            for i in range(2):
+                feed_dict = self.make_feed_dict(prob = False, batch = batch, image = False)
+                self.g_opt.run(feed_dict=feed_dict)
         self.save_checkpoint()
+
+
+    # 入出力ベクトルの配置
+    def make_feed_dict(self, prob, batch, image = True, z = True):
+        feed_dict = {}
+        if image:
+            feed_dict.setdefault(self.image, batch[0])
+        if z:
+            feed_dict.setdefault(self.z, batch[1])
+        i = 0
+        for keep_prob in self.keep_probs:
+            if prob:
+                feed_dict.setdefault(keep_prob['var'], 1.0)
+            else:
+                feed_dict.setdefault(keep_prob['var'], keep_prob['prob'])
+            i += 1
+        return feed_dict
 
 
     # 精度評価
@@ -82,7 +104,6 @@ class dcgan(dnn_template):
                                     algo = self.config["TrainingConfig"]["TrainOps"],
                                     learning_rate = self.config["TrainingConfig"]["LearningRate"],
                                     var_list = g_val)
-
 
     # 誤差関数の定義
     def loss(self):
@@ -119,7 +140,6 @@ class dcgan(dnn_template):
         self.G = self.generator(z = self.z)
         self.D_REAL = self.discriminator(image = self.image, reuse = False)
         self.D_FAKE = self.discriminator(image = self.G, reuse = True)
-
 
     def discriminator(self, image, reuse):
         print "Discriminator: reuse", reuse
@@ -174,9 +194,6 @@ class dcgan(dnn_template):
                              OutputNode = [1])
         return d10
 
-
-
-
     def generator(self, z):
         print 'Generator'
         with tf.variable_scope('G'):
@@ -224,12 +241,23 @@ class dcgan(dnn_template):
 
         return g4
 
-
+    def get_image(self, z):
+        feed_dict = self.make_feed_dict(prob = False, batch = [None, z], image = False)
+        result = self.sess.run(self.G, feed_dict = feed_dict)
+        return result
 
 if __name__ == '__main__':
     import data_reader
+    import cv2
     data = data_reader.read_data_sets()
     config = dnn_cell_template(data = None, length = None)
     dnn = dcgan(config = config)
     dnn.construct()
+    learning_config = {'BatchConfig' : {'TrainNum' : 2,
+                                        'BatchSize' : 50,
+                                        'LogPeriod' : 1}}
+    dnn.learning(data = data, config = learning_config)
+    z = [2.0 * np.random.rand(100) - 1.0]
+    img = dnn.get_image(z = z)
+    cv2.imwrite('sample.png', img[0])
     dnn.session_close()
