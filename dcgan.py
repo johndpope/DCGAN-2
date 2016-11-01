@@ -98,10 +98,14 @@ class dcgan(dnn_template):
         self.d_opt = ut.select_algo(loss_function = self.d_loss,
                                     algo = self.config["TrainingConfig"]["TrainOps"],
                                     learning_rate = self.config["TrainingConfig"]["LearningRate"],
+                                    b1 = self.config["TrainingConfig"]["LearningBeta1"],
+                                    b2 = self.config["TrainingConfig"]["LearningBeta2"],
                                     var_list = d_val)
         self.g_opt = ut.select_algo(loss_function = self.g_loss,
                                     algo = self.config["TrainingConfig"]["TrainOps"],
                                     learning_rate = self.config["TrainingConfig"]["LearningRate"],
+                                    b1 = self.config["TrainingConfig"]["LearningBeta1"],
+                                    b2 = self.config["TrainingConfig"]["LearningBeta2"],
                                     var_list = g_val)
 
     # 誤差関数の定義
@@ -250,6 +254,8 @@ if __name__ == '__main__':
     import cv2
     data = data_reader.read_data_sets()
     config = dnn_cell_template(data = None, length = None)
+    config["TrainingConfig"]["LearningRate"] = 0.0002
+    config["TrainingConfig"]["LearningBeta1"] = 0.5
     dnn = dcgan(config = config)
     dnn.construct()
     learning_config = {'BatchConfig' : {'TrainNum' : 1000,
