@@ -260,8 +260,8 @@ if __name__ == '__main__':
     config["TrainingConfig"]["LearningBeta1"] = 0.5
     dnn = dcgan(config = config)
     dnn.construct()
-    learning_config = {'BatchConfig' : {'TrainNum' : 1000,
-                                        'BatchSize' : 10,
+    learning_config = {'BatchConfig' : {'TrainNum' : 10000,
+                                        'BatchSize' : 50,
                                         'LogPeriod' : 1}}
     dnn.learning(data = data, config = learning_config)
     z = [2.0 * np.random.rand(100) - 1.0]
