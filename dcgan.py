@@ -50,6 +50,7 @@ class dcgan(dnn_template):
 
     # 学習の実行
     def learning(self, data,
+                 boost = 5,
                  config = {'BatchConfig' : {'TrainNum' : 100,
                                             'BatchSize' : 50,
                                             'LogPeriod' : 5}}):
@@ -66,7 +67,7 @@ class dcgan(dnn_template):
             # 学習
             feed_dict = self.make_feed_dict(prob = False, batch = batch)
             self.d_opt.run(feed_dict=feed_dict)
-            for i in range(2):
+            for i in range(boost):
                 feed_dict = self.make_feed_dict(prob = False, batch = batch, image = False)
                 self.g_opt.run(feed_dict=feed_dict)
 
