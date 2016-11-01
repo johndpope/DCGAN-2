@@ -65,9 +65,8 @@ class dcgan(dnn_template):
             # 学習
             feed_dict = self.make_feed_dict(prob = False, batch = batch)
             self.d_opt.run(feed_dict=feed_dict)
-            for i in range(2):
-                feed_dict = self.make_feed_dict(prob = False, batch = batch, image = False)
-                self.g_opt.run(feed_dict=feed_dict)
+            feed_dict = self.make_feed_dict(prob = False, batch = batch, image = False)
+            self.g_opt.run(feed_dict=feed_dict)
         self.save_checkpoint()
 
 
