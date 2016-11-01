@@ -36,17 +36,51 @@ class dcgan(dnn_template):
         self.io_def()
         # ネットワークの構成
         self.interface()
-        '''
         # 誤差関数の定義
         self.loss()
         # 学習
         self.training()
+        '''
         # 精度の定義
         self.get_accuracy()
         # チェックポイントの呼び出し
         self.saver = tf.train.Saver()
         self.restore()
         '''
+
+    def training(self):
+        d_val = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='D')
+        g_val = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='G')
+        self.d_opt = ut.select_algo(loss_function = self.d_loss,
+                                    algo = self.config["TrainingConfig"]["TrainOps"],
+                                    learning_rate = self.config["TrainingConfig"]["LearningRate"],
+                                    var_list = d_val)
+        self.g_opt = ut.select_algo(loss_function = self.g_loss,
+                                    algo = self.config["TrainingConfig"]["TrainOps"],
+                                    learning_rate = self.config["TrainingConfig"]["LearningRate"],
+                                    var_list = g_val)
+        
+
+    # 誤差関数の定義
+    def loss(self):
+        config = {'Type' : 'classified-sigmoid',
+                  'Sparse' : {'Activate' : False,
+                              'Logit' : None,
+                              'Beta' : None},
+                  'BATCH_SIZE' : self.config['BatchConfig']['BatchSize']}
+        self.d_loss_real = ut.error_func(y = self.D_REAL,
+                                         y_ = tf.ones_like(self.D_REAL),
+                                         config = config)
+
+        self.d_loss_fake = ut.error_func(y = self.D_FAKE,
+                                         y_ = tf.zeros_like(self.D_FAKE),
+                                         config = config)
+
+        self.g_loss = ut.error_func(y = self.D_FAKE,
+                                    y_ = tf.ones_like(self.D_FAKE),
+                                    config = config)
+        self.d_loss = self.d_loss_real + self.d_loss_fake
+
 
     # I/Oの定義
     def io_def(self, h = 64, w = 64, c = 3, zdim = 100):
@@ -109,12 +143,12 @@ class dcgan(dnn_template):
             d8 = sly.pooling(x = d7)
             d9 = sly.reshape_tf(x = d8,
                              shape = [-1, 4 * 4 * 512])
-            d10 = sly.fnn(x = d9, vname = 'FNN',
-                         Act = 'Equal',
-                         Batch = False,
-                         MaxoutNum = 3,
-                         InputNode = [4 * 4 * 512],
-                         OutputNode = [1])
+            d10, _ = sly.fnn(x = d9, vname = 'FNN',
+                             Act = 'Equal',
+                             Batch = False,
+                             MaxoutNum = 3,
+                             InputNode = [4 * 4 * 512],
+                             OutputNode = [1])
         return d10
 
 
