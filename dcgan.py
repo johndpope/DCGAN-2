@@ -26,8 +26,10 @@ class dcgan(dnn_template):
                                             'DataSize' : None},
                            'Data' : None,
                            'StoreConfig' : {'CheckPoint' : './Model/dnn_tempalte.ckpt',
-                                            'Initialize' : True}}):
+                                            'Initialize' : True}},
+                 feature_match = 0.0):
         super(dcgan, self).__init__(config)
+        self.feature_match = feature_match
 
     # あとで消す
     def construct(self):
@@ -60,7 +62,7 @@ class dcgan(dnn_template):
             if i%config['BatchConfig']['LogPeriod'] == 0:
                 feed_dict = self.make_feed_dict(prob = True, batch = batch)
                 ac0 = self.accuracy[0].eval(feed_dict=feed_dict)
-                feed_dict = self.make_feed_dict(prob = True, batch = batch, image = False)
+                feed_dict = self.make_feed_dict(prob = True, batch = batch, image = True)
                 ac1 = self.accuracy[1].eval(feed_dict=feed_dict)
                 print "step %d, D-Loss / G-Loss %g , %g"%(i, ac0, ac1), datetime.now().strftime("%Y/%m/%d %H:%M:%S")
                 self.save_checkpoint()
@@ -68,7 +70,7 @@ class dcgan(dnn_template):
             feed_dict = self.make_feed_dict(prob = False, batch = batch)
             self.d_opt.run(feed_dict=feed_dict)
             for i in range(boost):
-                feed_dict = self.make_feed_dict(prob = False, batch = batch, image = False)
+                feed_dict = self.make_feed_dict(prob = False, batch = batch, image = True)
                 self.g_opt.run(feed_dict=feed_dict)
 
         self.save_checkpoint()
@@ -114,24 +116,32 @@ class dcgan(dnn_template):
 
     # 誤差関数の定義
     def loss(self):
-        config = {'Type' : 'classified-sigmoid',
+        config = {'Type' : 'classified-sparse-softmax',
                   'Sparse' : {'Activate' : False,
                               'Logit' : None,
                               'Beta' : None},
                   'BATCH_SIZE' : self.config['BatchConfig']['BatchSize']}
+
         self.d_loss_real = ut.error_func(y = self.D_REAL,
-                                         y_ = tf.ones_like(self.D_REAL),
+                                         y_ = tf.constant([1, 0], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
                                          config = config)
 
         self.d_loss_fake = ut.error_func(y = self.D_FAKE,
-                                         y_ = tf.zeros_like(self.D_FAKE),
+                                         y_ = tf.constant([0, 1], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
                                          config = config)
 
-        self.g_loss = ut.error_func(y = self.D_FAKE,
-                                    y_ = tf.ones_like(self.D_FAKE),
+        self.g_loss_base = ut.error_func(y = self.D_FAKE,
+                                    y_ = tf.constant([1, 0], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
                                     config = config)
         self.d_loss = self.d_loss_real + self.d_loss_fake
 
+        # feature matching
+        if self.feature_match != 0.0:
+            l = (self.h * self.w * self.c)
+            self.g_loss_image = tf.reduce_mean(tf.mul(tf.nn.l2_loss(self.G - self.image) / (l * l) , self.feature_match))
+            self.g_loss = self.g_loss_base + self.g_loss_image
+        else:
+            self.g_loss = self.g_loss_base
 
     # I/Oの定義
     def io_def(self, h = 64, w = 64, c = 3, zdim = 100):
@@ -198,7 +208,7 @@ class dcgan(dnn_template):
                              Batch = False,
                              MaxoutNum = 3,
                              InputNode = [4 * 4 * 512],
-                             OutputNode = [1])
+                             OutputNode = [2])
         return d10
 
     def generator(self, z):
@@ -260,11 +270,11 @@ if __name__ == '__main__':
     config = dnn_cell_template(data = None, length = None)
     config["TrainingConfig"]["LearningRate"] = 0.0002
     config["TrainingConfig"]["LearningBeta1"] = 0.5
-    dnn = dcgan(config = config)
+    dnn = dcgan(config = config, feature_match = 0.1)
     dnn.construct()
-    learning_config = {'BatchConfig' : {'TrainNum' : 100000,
+    learning_config = {'BatchConfig' : {'TrainNum' : 3,
                                         'BatchSize' : 50,
-                                        'LogPeriod' : 10}}
+                                        'LogPeriod' : 1}}
     dnn.learning(data = data, config = learning_config, boost = 1)
     z = [2.0 * np.random.rand(100) - 1.0]
     img = dnn.get_image(z = z)
