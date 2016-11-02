@@ -215,12 +215,12 @@ class dcgan(dnn_template):
         print 'Generator'
         with tf.variable_scope('G'):
             g0, _ = sly.project(x = z, vname = 'Project',
-                             Act = 'Relu',
+                             Act = 'LRelu',
                              Batch = True,
                              InputNode = [self.zdim],
                              OutputNode = [4, 4, 1024])
             g1, _ = sly.deconv(x = g0, vname = 'Deconv1',
-                            Act = 'Relu',
+                            Act = 'LRelu',
                             Batch = True,
                             InputNode = [4, 4, 1024],
                             OutputNode = [8, 8, 512],
@@ -229,7 +229,7 @@ class dcgan(dnn_template):
                             Padding = 'SAME',
                             Network_type = 'transpose')
             g2, _ = sly.deconv(x = g1, vname = 'Deconv2',
-                            Act = 'Relu',
+                            Act = 'LRelu',
                             Batch = True,
                             InputNode = [8, 8, 512],
                             OutputNode = [16, 16, 256],
@@ -238,7 +238,7 @@ class dcgan(dnn_template):
                             Padding = 'SAME',
                             Network_type = 'transpose')
             g3, _ = sly.deconv(x = g2, vname = 'Deconv3',
-                               Act = 'Relu',
+                               Act = 'LRelu',
                                Batch = True,
                                InputNode = [16, 16, 256],
                                OutputNode = [32, 32, 128],
@@ -247,7 +247,7 @@ class dcgan(dnn_template):
                                Padding = 'SAME',
                                Network_type = 'transpose')
             g4, _ = sly.deconv(x = g3, vname = 'Deconv4',
-                               Act = 'Tanh',
+                               Act = 'Sigmoid',
                                Batch = True,
                                InputNode = [32, 32, 128],
                                OutputNode = [self.h, self.w, self.c],
@@ -261,7 +261,7 @@ class dcgan(dnn_template):
     def get_image(self, z):
         feed_dict = self.make_feed_dict(prob = False, batch = [None, z], image = False)
         result = self.sess.run(self.G, feed_dict = feed_dict)
-        return result
+        return tf.mod(result, 255)
 
 if __name__ == '__main__':
     import data_reader
