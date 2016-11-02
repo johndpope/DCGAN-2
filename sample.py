@@ -34,7 +34,7 @@ for i in range(1):
     z.append(2.0 * np.random.rand(100) - 1.0)
 img = dnn.get_image(z = z)
 a = cv2.imread('./Data/Sample/000.jpg')
-print a
+print 'a:', a
 for i in range(1):
-    print img[i]
+    print 'res:', img[i]
 dnn.session_close()
