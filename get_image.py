@@ -34,6 +34,6 @@ for i in range(100):
     z.append(2.0 * np.random.rand(100) - 1.0)
 img = dnn.get_image(z = z)
 for i in range(100):
-    p = int(255 * (img[i] + 1.0))
+    p = 255 * (img[i] + 1.0)
     cv2.imwrite('./Pic/sample' + str(i) +'.png', p)
 dnn.session_close()
