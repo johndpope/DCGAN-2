@@ -272,11 +272,11 @@ if __name__ == '__main__':
     config["TrainingConfig"]["LearningBeta1"] = 0.5
     dnn = dcgan(config = config, feature_match = 0.1)
     dnn.construct()
-    learning_config = {'BatchConfig' : {'TrainNum' : 100000,
+    learning_config = {'BatchConfig' : {'TrainNum' : 10000,
                                         'BatchSize' : 50,
                                         'LogPeriod' : 10}}
     dnn.learning(data = data, config = learning_config, boost = 1)
     z = [2.0 * np.random.rand(100) - 1.0]
     img = dnn.get_image(z = z)
-    cv2.imwrite('sample.png', img[0])
+    cv2.imwrite('./Pic/sample.png', img[0])
     dnn.session_close()
