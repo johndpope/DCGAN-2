@@ -15,7 +15,7 @@ class DataSet(object):
         imgs, labels= [], []
         for i in range(len(self.files) - 1):
             img = self.files[i]
-            imgs.append(i)
+            imgs.append(img / 255)
             labels.append(i)
         self._images = np.array(imgs)
         self._labels = np.array(labels)
