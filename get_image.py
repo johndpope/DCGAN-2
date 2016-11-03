@@ -32,7 +32,9 @@ learning_config = {'BatchConfig' : {'TrainNum' : 100000,
 z = []
 for i in range(100):
     z.append(2.0 * np.random.rand(100) - 1.0)
-img = dnn.get_image(z = z)
+img = dnn.get_image(z = np.array(z))
+print img
+img = np.array(img)
 for i in range(100):
     p = img[i]
     cv2.imwrite('./Pic/sample' + str(i) +'.png', p)
