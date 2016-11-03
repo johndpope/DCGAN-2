@@ -261,7 +261,7 @@ class dcgan(dnn_template):
     def get_image(self, z):
         feed_dict = self.make_feed_dict(prob = False, batch = [None, z], image = False)
         result = self.sess.run(self.G, feed_dict = feed_dict)
-        return tf.mod(result, 255)
+        return result * 255
 
 if __name__ == '__main__':
     import data_reader
