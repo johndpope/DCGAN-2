@@ -285,8 +285,10 @@ if __name__ == '__main__':
         dnn.learning(data = data, config = learning_config, boost = 1)
         z = []
         for j in range(10):
-            z.append([2.0 * np.random.rand(100) - 1.0])
+            z.append(2.0 * np.random.rand(100) - 1.0)
         img = dnn.get_image(z = z)
         for j in range(10):
-            cv2.imwrite('./Pic/sample' + str(j) + '.png', img[j])
+            mv = np.max(np.fabs(img[j])
+            image = img[j] / mv * 127 + 128
+            cv2.imwrite('./Pic/sample' + str(j) + '.png', image)
     dnn.session_close()
