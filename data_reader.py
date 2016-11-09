@@ -44,7 +44,7 @@ class DataSet(object):
         self.start = end
         imgs, labels = [], []
         for i in range(start, end):
-            img = cv2.imread(self.files[i])
+            img = cv2.imread(self.files[i]) / 255
             img = cv2.resize(img, (64, 64))
             imgs.append(img)
             r = 2.0 * np.random.rand(self.zdim) - 1.0
