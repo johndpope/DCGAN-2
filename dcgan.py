@@ -282,7 +282,7 @@ if __name__ == '__main__':
     learning_config = {'BatchConfig' : {'TrainNum' : 1000,
                                         'BatchSize' : 50,
                                         'LogPeriod' : 10}}
-    for i in range(100):
+    for i in range(1000):
         dnn.learning(data = data, config = learning_config, boost = 1)
         z = []
         for j in range(10):
