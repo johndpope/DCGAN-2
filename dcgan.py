@@ -124,15 +124,21 @@ class dcgan(dnn_template):
 
         self.d_loss_real = ut.error_func(y = self.D_REAL,
                                          y_ = tf.constant([1, 0], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
-                                         config = config)
+                                         config = config,
+                                         regularization = 0.1,
+                                         variable_filter = 'Dsc')
 
         self.d_loss_fake = ut.error_func(y = self.D_FAKE,
                                          y_ = tf.constant([0, 1], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
-                                         config = config)
+                                         config = config,
+                                         regularization = 0.1,
+                                         variable_filter = 'Dsc')
 
         self.g_loss_base = ut.error_func(y = self.D_FAKE,
-                                    y_ = tf.constant([1, 0], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
-                                    config = config)
+                                         y_ = tf.constant([1, 0], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
+                                         config = config,
+                                         regularization = 0.1,
+                                         variable_filter = 'Dsc')
         self.d_loss = self.d_loss_real + self.d_loss_fake
 
         # feature matching

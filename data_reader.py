@@ -4,7 +4,7 @@ import commands
 import csv
 import numpy as np
 import cv2
-from preprocessing_tool import preprocessing_tool as pp
+from preprocessing_tool import preprocessing as pp
 
 class DataSet(object):
     def __init__(self, zdim = 100):
