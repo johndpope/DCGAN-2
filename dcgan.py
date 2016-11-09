@@ -276,6 +276,7 @@ if __name__ == '__main__':
     config = dnn_cell_template(data = None, length = None)
     config["TrainingConfig"]["LearningRate"] = 0.0002
     config["TrainingConfig"]["LearningBeta1"] = 0.5
+    config["StoreConfig"]["Initialize"] = False
     dnn = dcgan(config = config, feature_match = 0.1)
     dnn.construct()
     learning_config = {'BatchConfig' : {'TrainNum' : 100,
