@@ -4,6 +4,7 @@ import commands
 import csv
 import numpy as np
 import cv2
+from preprocessing_tool import preprocessing_tool as pp
 
 class DataSet(object):
     def __init__(self, zdim = 100):
@@ -44,7 +45,8 @@ class DataSet(object):
         self.start = end
         imgs, labels = [], []
         for i in range(start, end):
-            img = cv2.imread(self.files[i]) / 255
+            img = cv2.imread(self.files[self._images[i]])
+            img = pp.PreProcessing(img)
             img = cv2.resize(img, (64, 64))
             imgs.append(img)
             r = 2.0 * np.random.rand(self.zdim) - 1.0

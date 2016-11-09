@@ -99,8 +99,8 @@ class dcgan(dnn_template):
 
 
     def training(self):
-        d_val = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='D')
-        g_val = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='G')
+        d_val = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Dsc')
+        g_val = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Gen')
         self.d_opt = ut.select_algo(loss_function = self.d_loss,
                                     algo = self.config["TrainingConfig"]["TrainOps"],
                                     learning_rate = self.config["TrainingConfig"]["LearningRate"],
@@ -160,7 +160,7 @@ class dcgan(dnn_template):
 
     def discriminator(self, image, reuse):
         print "Discriminator: reuse", reuse
-        with tf.variable_scope('D', reuse = reuse):
+        with tf.variable_scope('Dsc', reuse = reuse):
             d1, _ = sly.conv(x = image,
                              vname = 'Conv1',
                              Act = 'LRelu',
@@ -213,7 +213,7 @@ class dcgan(dnn_template):
 
     def generator(self, z):
         print 'Generator'
-        with tf.variable_scope('G'):
+        with tf.variable_scope('Gen'):
             g0, _ = sly.project(x = z, vname = 'Project',
                              Act = 'LRelu',
                              Batch = True,
@@ -247,7 +247,7 @@ class dcgan(dnn_template):
                                Padding = 'SAME',
                                Network_type = 'transpose')
             g4, _ = sly.deconv(x = g3, vname = 'Deconv4',
-                               Act = 'Sigmoid',
+                               Act = 'Tanh',
                                Batch = True,
                                InputNode = [32, 32, 128],
                                OutputNode = [self.h, self.w, self.c],
