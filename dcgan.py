@@ -146,8 +146,7 @@ class dcgan(dnn_template):
         # feature matching
         if self.feature_match != 0.0:
             self.g_loss_image = tf.reduce_mean(tf.mul(tf.nn.l2_loss(self.G - self.image), self.feature_match))
-            self.g_loss_dsc = tf.reduce_mean(tf.mul(tf.nn.l2_loss(self.D_FAKE - self.D_REAL), self.feature_match))
-            self.g_loss = self.g_loss_base + self.g_loss_image + self.g_loss_dsc
+            self.g_loss = self.g_loss_base + self.g_loss_image
         else:
             self.g_loss = self.g_loss_base
 
