@@ -27,9 +27,11 @@ class dcgan(dnn_template):
                            'Data' : None,
                            'StoreConfig' : {'CheckPoint' : './Model/dnn_tempalte.ckpt',
                                             'Initialize' : True}},
-                 feature_match = 0.0):
+                 feature_match = 0.0,
+                 regularization = 0.0):
         super(dcgan, self).__init__(config)
         self.feature_match = feature_match
+        self.regularization = regularization
 
     # あとで消す
     def construct(self):
@@ -125,27 +127,28 @@ class dcgan(dnn_template):
         self.d_loss_real = ut.error_func(y = self.D_REAL,
                                          y_ = tf.constant([1, 0], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
                                          config = config,
-                                         regularization = 0.0,
+                                         regularization = self.regularization,
                                          variable_filter = 'Dsc')
 
         self.d_loss_fake = ut.error_func(y = self.D_FAKE,
                                          y_ = tf.constant([0, 1], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
                                          config = config,
-                                         regularization = 0.0,
+                                         regularization = self.regularization,
                                          variable_filter = 'Dsc')
 
         self.g_loss_base = ut.error_func(y = self.D_FAKE,
                                          y_ = tf.constant([1, 0], shape=[self.config['BatchConfig']['BatchSize']], dtype = tf.int64),
                                          config = config,
-                                         regularization = 0.0,
+                                         regularization = self.regularization,
                                          variable_filter = 'Dsc')
         self.d_loss = self.d_loss_real + self.d_loss_fake
 
         # feature matching
         if self.feature_match != 0.0:
             l = (self.h * self.w * self.c)
-            self.g_loss_image = tf.reduce_mean(tf.mul(tf.nn.l2_loss(self.G - self.image) / (l * l) , self.feature_match))
-            self.g_loss = self.g_loss_base + self.g_loss_image
+            self.g_loss_image = tf.reduce_mean(tf.mul(tf.nn.l2_loss(self.G - self.image), self.feature_match))
+            self.g_loss_dsc = tf.mul(tf.nn.l2_loss(self.D_FAKE - self.D_REAL), self.feature_match)
+            self.g_loss = self.g_loss_base + self.g_loss_image + self.g_loss_dsc
         else:
             self.g_loss = self.g_loss_base
 
@@ -277,12 +280,12 @@ if __name__ == '__main__':
     config["TrainingConfig"]["LearningRate"] = 0.0002
     config["TrainingConfig"]["LearningBeta1"] = 0.5
     config["StoreConfig"]["Initialize"] = False
-    dnn = dcgan(config = config, feature_match = 0.0)
+    dnn = dcgan(config = config, feature_match = 0.1)
     dnn.construct()
     learning_config = {'BatchConfig' : {'TrainNum' : 1000,
                                         'BatchSize' : 50,
                                         'LogPeriod' : 10}}
-    for i in range(1000):
+    for i in range(100000):
         dnn.learning(data = data, config = learning_config, boost = 1)
         z = []
         for j in range(10):
