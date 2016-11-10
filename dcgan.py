@@ -278,7 +278,7 @@ if __name__ == '__main__':
     config["TrainingConfig"]["LearningRate"] = 0.0002
     config["TrainingConfig"]["LearningBeta1"] = 0.5
     config["StoreConfig"]["Initialize"] = False
-    dnn = dcgan(config = config, feature_match = 0.1)
+    dnn = dcgan(config = config, feature_match = 0.0)
     dnn.construct()
     learning_config = {'BatchConfig' : {'TrainNum' : 1000,
                                         'BatchSize' : 50,
