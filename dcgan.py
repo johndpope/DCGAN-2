@@ -170,7 +170,7 @@ class dcgan(dnn_template):
         with tf.variable_scope('Dsc', reuse = reuse):
             d1, _ = sly.conv(x = image,
                              vname = 'Conv1',
-                             Act = 'LRelu',
+                             Act = 'Elu',
                              MaxoutNum = 3,
                              Batch = True,
                              InputNode = [self.h, self.w, self.c],
@@ -180,7 +180,7 @@ class dcgan(dnn_template):
             d2 = sly.pooling(x = d1)
             d3, _ = sly.conv(x = d2,
                              vname = 'Conv2',
-                             Act = 'LRelu',
+                             Act = 'Elu',
                              MaxoutNum = 3,
                              Batch = True,
                              InputNode = [32, 32, 64],
@@ -190,7 +190,7 @@ class dcgan(dnn_template):
             d4 = sly.pooling(x = d3)
             d5, _ = sly.conv(x = d4,
                              vname = 'Conv3',
-                             Act = 'LRelu',
+                             Act = 'Elu',
                              MaxoutNum = 3,
                              Batch = True,
                              InputNode = [16, 16, 128],
@@ -200,7 +200,7 @@ class dcgan(dnn_template):
             d6 = sly.pooling(x = d5)
             d7, _ = sly.conv(x = d6,
                              vname = 'Conv6',
-                             Act = 'LRelu',
+                             Act = 'Elu',
                              MaxoutNum = 3,
                              Batch = True,
                              InputNode = [8, 8, 256],
@@ -222,12 +222,12 @@ class dcgan(dnn_template):
         print 'Generator'
         with tf.variable_scope('Gen'):
             g0, _ = sly.project(x = z, vname = 'Project',
-                             Act = 'LRelu',
+                             Act = 'Relu',
                              Batch = True,
                              InputNode = [self.zdim],
                              OutputNode = [4, 4, 1024])
             g1, _ = sly.deconv(x = g0, vname = 'Deconv1',
-                            Act = 'LRelu',
+                            Act = 'Relu',
                             Batch = True,
                             InputNode = [4, 4, 1024],
                             OutputNode = [8, 8, 512],
@@ -236,7 +236,7 @@ class dcgan(dnn_template):
                             Padding = 'SAME',
                             Network_type = 'transpose')
             g2, _ = sly.deconv(x = g1, vname = 'Deconv2',
-                            Act = 'LRelu',
+                            Act = 'Relu',
                             Batch = True,
                             InputNode = [8, 8, 512],
                             OutputNode = [16, 16, 256],
@@ -245,7 +245,7 @@ class dcgan(dnn_template):
                             Padding = 'SAME',
                             Network_type = 'transpose')
             g3, _ = sly.deconv(x = g2, vname = 'Deconv3',
-                               Act = 'LRelu',
+                               Act = 'Relu',
                                Batch = True,
                                InputNode = [16, 16, 256],
                                OutputNode = [32, 32, 128],
@@ -280,7 +280,7 @@ if __name__ == '__main__':
     config["StoreConfig"]["Initialize"] = False
     dnn = dcgan(config = config, feature_match = 0.0)
     dnn.construct()
-    learning_config = {'BatchConfig' : {'TrainNum' : 1000,
+    learning_config = {'BatchConfig' : {'TrainNum' : 100,
                                         'BatchSize' : 50,
                                         'LogPeriod' : 10}}
     for i in range(100000):
